@@ -21,6 +21,7 @@ runs:
         echo "::set-output name=csproj_dirs::$(curl --location -s --request GET 'https://api.github.com/repos/Energinet-DataHub/geh-market-roles/pulls/${{ github.event.number }}/files' --header 'Authorization: Bearer ${{ github.token }}'
         | jq -c '.[] | .status + ";" + .filename'
         | grep '.csproj'
+        | grep 'removed\|added'
         | xargs dirname
         | xargs)"
       shell: bash
