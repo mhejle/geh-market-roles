@@ -16,16 +16,21 @@ description: 'Checks that dependabot.yml gets updated with any added or removed 
 runs:
   using: "composite"
   steps:
-    - id: fetchCsprojDirs
+    - name: Fetch csproj dirs with changes
+      id: fetchCsprojDirs
       run: >
         echo "::set-output name=csproj_dirs::$(curl --location -s --request GET 'https://api.github.com/repos/Energinet-DataHub/geh-market-roles/pulls/${{ github.event.number }}/files' --header 'Authorization: Bearer ${{ github.token }}'
         | jq -c '.[] | .status + ";" + .filename'
         | grep '.csproj'
-        | grep 'removed\|added'
         | xargs dirname
         | xargs)"
       shell: bash
-    - run: |
+    - name: Check for removed csproj files # TODO: Implement this
+      run: |
+        echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}"
+      shell: bash
+    - name: Check added csproj files  # TODO: Implement this
+      run: |
         echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}"
       shell: bash
 
