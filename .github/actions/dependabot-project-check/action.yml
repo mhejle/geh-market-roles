@@ -25,6 +25,10 @@ runs:
         | xargs dirname
         | xargs)"
       shell: bash
+    - name: Test
+      run: |
+        echo "Teeeest"
+      shell: bash
     - name: Check for removed csproj files # TODO: Implement this
       run: |
         echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}"
