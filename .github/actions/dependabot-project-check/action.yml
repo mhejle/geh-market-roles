@@ -18,23 +18,21 @@ runs:
   steps:
     - name: Fetch csproj dirs with changes
       id: fetchCsprojDirs
-      run: >
-        echo "::set-output name=csproj_dirs::$(curl --location -s --request GET 'https://api.github.com/repos/Energinet-DataHub/geh-market-roles/pulls/${{ github.event.number }}/files' --header 'Authorization: Bearer ${{ github.token }}'
-        | jq -c '.[] | .status + ";" + .filename'
-        | grep '.csproj'
-        | xargs dirname
-        | xargs)"
-      shell: bash
-    - name: Test
       run: |
-        echo "Teeeest"
+        dirs=$(curl --location -s --request GET 'https://api.github.com/repos/Energinet-DataHub/geh-market-roles/pulls/${{ github.event.number }}/files' --header 'Authorization: Bearer ${{ github.token }}' | jq -c '.[] | .status + ";" + .filename' | grep '.csproj' | xargs dirname)
+        dirs="${dirs//$'\n'/'%0A'}" # This currently seems to be the best fix to passing along multiline results https://github.community/t/set-output-truncates-multiline-strings/16852
+        echo Output dirs: $dirs
+        echo "::set-output name=csproj_dirs::$dirs"
       shell: bash
     - name: Check for removed csproj files # TODO: Implement this
       run: |
-        echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}"
+        echo Showing dirs containing removed csprojs
+        echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}" | grep "removed"
+        cat ./.github/dependabot.yml
       shell: bash
     - name: Check added csproj files  # TODO: Implement this
       run: |
-        echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}"
+        echo Showing dirs containing added csprojs
+        echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}" | grep "added"
       shell: bash
 
