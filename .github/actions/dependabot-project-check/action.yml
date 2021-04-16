@@ -26,13 +26,27 @@ runs:
       shell: bash
     - name: Check for removed csproj files # TODO: Implement this
       run: |
-        echo Showing dirs containing removed csprojs
-        echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}" | grep "removed"
-        cat ./.github/dependabot.yml
+        set -o xtrace
+        echo "Here"
+        echo "${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}" | sed 's/.*;//'
+        dirs="echo "${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}"
+        for dir in $dirs; do
+          echo "Testing if $dir has been removed from dependabot.yml"
+          echo "Grep result:"
+          grep -e "$dir" ./.github/dependabot.yml
+          echo "If statement:"
+          grep -q -v -e "$dir" ./.github/dependabot.yml || { printf '%s\n' "The csproj file in $dir has been removed but still exists in dependabot.yml. Please run dependabot-generator.bat." >&2; exit 1; }
+        done
+        set +o xtrace
       shell: bash
-    - name: Check added csproj files  # TODO: Implement this
-      run: |
-        echo Showing dirs containing added csprojs
-        echo "Result: ${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}" | grep "added"
-      shell: bash
+#    - name: Check added csproj files  # TODO: Implement this
+#      run: |
+#        for dir in "${{ steps.fetchCsprojDirs.outputs.csproj_dirs }}" ; do
+#          echo "Testing if $dir is found in dependabot.yml"
+#          echo "Grep result:"
+#          grep -e "$dir" ./.github/dependabot.yml
+#          echo "If statement:"
+#          grep -q -e "$dir" ./.github/dependabot.yml || { printf '%s\n' "The csproj file in $dir has not been added to dependabot.yml. Please run dependabot-generator.bat." >&2; exit 1; }
+#        done
+#      shell: bash
 
